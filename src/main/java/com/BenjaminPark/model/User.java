@@ -49,6 +49,23 @@ public class User {
         tasks.remove(task);
     }
 
+    /**
+     * Method returns string with list of tasks.
+     */
+
+    public String tasksToString() {
+        StringBuilder sb = new StringBuilder();
+        if (tasks.isEmpty()) {
+            sb.append("The user ").append(name).append(" has no tasks");
+        } else {
+            sb.append("The user ").append(name).append(" has the following tasks: \n");
+            for (Task task : tasks) {
+                sb.append(task.toString()).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         return "User: name=" + name + ", userId=" + userId + ", taskCount=" + tasks.size();
