@@ -4,7 +4,7 @@ import java.util.UUID;
 
 /**
  * Task contain an id, description, title and status.
- * Open to potential expansions in the future, ie. due date, duration, etc.
+ * Open to potential expansions in the future, i.e. due date, duration, etc.
  */
 
 public class Task {
@@ -57,6 +57,9 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task: taskId=" + taskId + ", title=" + title + ", description=" + description + ", status=" + status;
+        return "Task ID: " + taskId + "\n" +
+                "Title: " + title + "\n" +
+                "Description: " + description + "\n" +
+                "Status: " + status + "\n";
     }
 }
