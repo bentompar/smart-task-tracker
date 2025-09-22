@@ -16,7 +16,7 @@ class TaskServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("Ben");
+        user = new User("Ben", "test".toCharArray());
         taskService = new TaskService();
     }
 
