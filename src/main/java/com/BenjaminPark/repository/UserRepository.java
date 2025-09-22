@@ -2,59 +2,40 @@ package com.BenjaminPark.repository;
 
 import com.BenjaminPark.model.User;
 
+import java.security.KeyStore;
 import java.util.*;
 
 public class UserRepository {
 
-    private final Map<UUID, User> users = new HashMap<>();
+    private final Map<UUID, User> users;
 
-
-    /**
-     * Adds user to users HashMap.
-     *
-     * @param user The user to add to the users HashMap.
-     * @throws DuplicateUserException if user with same userId already exists in users HashMap.
-     */
-    public User addUser(User user) throws DuplicateUserException {
-        if (!users.containsKey(user.getUserId())) {
-            users.put(user.getUserId(), user);
-            return user;
-        } else {
-            throw new DuplicateUserException("User with id " + user.getUserId() + " already exists");
-        }
+    public UserRepository() {
+        this.users = new HashMap<>();
     }
 
+    public void add(User user) {
+        users.put(user.getUserId(), user);
+    }
 
-    /**
-     * Deletes a user from users HashMap.
-     *
-     * @param id The userID of the user to be deleted.
-     * @throws MissingUserException when user not found in users HashMap.
-     */
-    public User deleteUser(UUID id) throws MissingUserException {
+    public void delete(User user) {
+        users.remove(user.getUserId());
+    }
+
+    public void update(User user) {
+        users.put(user.getUserId(), user);
+    }
+
+    public boolean userExistsById(UUID id) {
+
         if (users.containsKey(id)) {
-            User user = users.get(id);
-            users.remove(id);
-            return user;
+            return true;
         } else {
-            throw new MissingUserException("User with id " + id + " not found");
+            return false;
         }
     }
 
-
-    /**
-     * Updates a user from the users HashMap.
-     *
-     * @param user The user to be updated.
-     * @throws MissingUserException when user not found in users HashMap.
-     */
-    public User updateUser(User user) throws MissingUserException {
-        if (users.containsKey(user.getUserId())) {
-            users.put(user.getUserId(), user);
-            return user;
-        } else {
-            throw new MissingUserException("User with id " + user.getUserId() + " not found");
-        }
+    public boolean userExistsByName(String name) {
+        return users.values().stream().anyMatch(u -> u.getName().equalsIgnoreCase(name));
     }
 
     /**
@@ -71,6 +52,16 @@ public class UserRepository {
             throw new MissingUserException("User with id " + id + " not found");
         }
     }
+
+    public User getUserByName(String name) throws MissingUserException {
+        return users.values().stream()
+                .filter(u -> u.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new MissingUserException("User with name " + name + " not found"));
+
+    }
+
+
 
     /**
      * Returns unmodifiable users map.
