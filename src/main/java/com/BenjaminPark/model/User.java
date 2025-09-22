@@ -1,20 +1,26 @@
 package com.BenjaminPark.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import com.BenjaminPark.service.InvalidPasswordException;
+
+import java.util.*;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class User {
     private String name;
+    private String hashedPassword;
     private final UUID userId;
     private final List<Task> tasks;
+    private final BCryptPasswordEncoder  passwordEncoder =  new BCryptPasswordEncoder(10);
 
-    public User(String name) {
+    public User(String name, char[] password) {
         this.name = name;
+        this.hashedPassword = passwordEncoder.encode(new String(password));
         this.userId = UUID.randomUUID();
         tasks = new ArrayList<>();
+        Arrays.fill(password, '0');
     }
+
 
     public UUID getUserId() {
         return userId;
@@ -29,6 +35,23 @@ public class User {
     }
     public void setName(String name) {
         this.name = name;
+    }
+
+
+    public void setPassword(char[] password) {
+        this.hashedPassword = passwordEncoder.encode(new String(password));
+    }
+
+    /**
+     * Method is only for authenticating password
+     *
+     * @param password The input password to be authenticated with the user's password
+     * @throws InvalidPasswordException when passwords do not match
+     */
+    public void authenticatePassword(char[] password) throws InvalidPasswordException {
+        if (!passwordEncoder.matches(new String(password), hashedPassword)) {
+            throw new InvalidPasswordException("Incorrect Password");
+        }
     }
 
     /**
@@ -47,6 +70,17 @@ public class User {
      */
     public void removeTaskInternal(Task task) {
         tasks.remove(task);
+    }
+
+    public void updateTaskInternal(Task task) {
+        for (Task t : getTasks()) {
+            if (t.getTaskId().equals(task.getTaskId())) {
+                t.setTitle(task.getTitle());
+                t.setDescription(task.getDescription());
+                t.setStatus(task.getStatus());
+                break;
+            }
+        }
     }
 
     /**
