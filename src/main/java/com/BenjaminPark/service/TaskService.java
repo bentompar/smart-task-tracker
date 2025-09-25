@@ -1,16 +1,14 @@
 package com.BenjaminPark.service;
 
 import com.BenjaminPark.dto.TaskUpdateRequest;
-import com.BenjaminPark.model.Status;
 import com.BenjaminPark.model.Task;
 import com.BenjaminPark.model.User;
 import com.BenjaminPark.repository.TaskRepository;
-import com.BenjaminPark.repository.UserRepository;
 
 import java.util.UUID;
 
 public class TaskService {
-    private TaskRepository taskRepository = new TaskRepository();
+    private final TaskRepository taskRepository;
 
     public TaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
@@ -22,10 +20,9 @@ public class TaskService {
      * @param task  The task to be added.
      */
     public void addTask(User user, Task task) throws DuplicateTaskException {
-        if (taskRepository.taskExistsById(user, task.getTaskId())) {
-            throw new DuplicateTaskException("Task with id " + task.getTaskId() + " already exists");
+        if (!taskRepository.add(user, task)) {
+            throw new DuplicateTaskException("Unexpected task UUID collision");
         }
-        taskRepository.add(user, task);
 
     }
 
@@ -48,24 +45,23 @@ public class TaskService {
      * Updates task using task.java internal method.
      *
      * @param user      The user to whom the task belongs.
-     * @param task      The updated task.
+     * @param taskId      The updated task's id.
      * @throws MissingTaskException when task with taskId not found.
      */
-    public void updateTask(User user, Task task, TaskUpdateRequest taskUpdateRequest) throws MissingTaskException {
-        if (!taskRepository.taskExistsById(user, task.getTaskId())) {
-            throw new MissingTaskException("Task with id " + task.getTaskId() + " does not exist");
-        } else {
-            if (taskUpdateRequest.getTitle() != null) {
-                task.setTitle(taskUpdateRequest.getTitle());
-            }
-            if (taskUpdateRequest.getDescription() != null) {
-                task.setDescription(taskUpdateRequest.getDescription());
-            }
-            if (taskUpdateRequest.getStatus() != null) {
-                task.setStatus(taskUpdateRequest.getStatus());
-            }
-            taskRepository.update(user, task);
+    public void updateTask(User user, UUID taskId, TaskUpdateRequest taskUpdateRequest) throws MissingTaskException {
+        Task task = taskRepository.getTaskById(user, taskId);
+
+        if (taskUpdateRequest.getTitle() != null) {
+            task.setTitle(taskUpdateRequest.getTitle());
         }
+        if (taskUpdateRequest.getDescription() != null) {
+            task.setDescription(taskUpdateRequest.getDescription());
+        }
+        if (taskUpdateRequest.getStatus() != null) {
+            task.setStatus(taskUpdateRequest.getStatus());
+        }
+        taskRepository.update(user, task);
+
     }
 
 }

@@ -36,7 +36,9 @@ public class UserService {
 
         User user = new User(name, password);
 
-        userRepository.add(user);
+        if (!userRepository.addIfAbsent(user.getUserId(), user)) {
+            throw new DuplicateUserException("Unexpected user UUID collision");
+        }
         return user;
     }
 
