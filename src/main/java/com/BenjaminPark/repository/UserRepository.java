@@ -1,20 +1,23 @@
 package com.BenjaminPark.repository;
 
 import com.BenjaminPark.model.User;
+import com.BenjaminPark.storage.StorageManager;
 
 import java.security.KeyStore;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UserRepository {
 
     private final Map<UUID, User> users;
+    //StorageManager storageManager = new StorageManager();
 
     public UserRepository() {
-        this.users = new HashMap<>();
+        this.users = new ConcurrentHashMap<>();
     }
 
-    public void add(User user) {
-        users.put(user.getUserId(), user);
+    public boolean addIfAbsent(UUID id, User user) {
+        return users.putIfAbsent(id, user) == null;
     }
 
     public void delete(User user) {
@@ -27,11 +30,7 @@ public class UserRepository {
 
     public boolean userExistsById(UUID id) {
 
-        if (users.containsKey(id)) {
-            return true;
-        } else {
-            return false;
-        }
+        return users.containsKey(id);
     }
 
     public boolean userExistsByName(String name) {

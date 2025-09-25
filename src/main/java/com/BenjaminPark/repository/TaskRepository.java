@@ -4,20 +4,21 @@ import com.BenjaminPark.model.Task;
 import com.BenjaminPark.model.User;
 import com.BenjaminPark.service.MissingTaskException;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class TaskRepository {
 
-    public void add(User user, Task task) {
-        user.addTaskInternal(task);
+    public boolean add(User user, Task task) {
+        return user.addTaskIfAbsent(task);
     }
 
     public void delete(User user, UUID taskId) {
-        for (Task task : user.getTasks()) {
-            if (task.getTaskId().equals(taskId)) {
-                user.removeTaskInternal(task);
-            }
+        Task task = user.getTasks().get(taskId);
+        if (task != null) {
+            user.removeTaskInternal(task);
         }
+
     }
 
     public void update(User user, Task task) {
@@ -25,16 +26,23 @@ public class TaskRepository {
     }
 
     public boolean taskExistsByName(User user, String name) {
-        return user.getTasks().stream().anyMatch(task -> task.getTitle().equalsIgnoreCase(name));
+        for (Map.Entry<UUID, Task> entry : user.getTasks().entrySet()) {
+            if (entry.getValue().getTitle().equalsIgnoreCase(name)) {
+                return true;
+            }
+        } return false;
     }
 
     public boolean taskExistsById(User user, UUID id) {
-        return user.getTasks().stream().anyMatch(task -> task.getTaskId().equals(id));
+        return user.getTasks().containsKey(id);
     }
 
     public Task getTaskById(User user, UUID id) throws MissingTaskException {
-        return user.getTasks().stream().filter(t -> t.getTaskId().equals(id)).findFirst().orElseThrow(
-                () -> new MissingTaskException("Task with id " + id + " not found"));
+        if (user.getTasks().containsKey(id)) {
+            return user.getTasks().get(id);
+        } else {
+            throw new MissingTaskException("Task with id " + id + " not found");
+        }
     }
 
 }
