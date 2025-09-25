@@ -3,6 +3,7 @@ package com.BenjaminPark.model;
 import com.BenjaminPark.service.InvalidPasswordException;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -10,15 +11,30 @@ public class User {
     private String name;
     private String hashedPassword;
     private final UUID userId;
-    private final List<Task> tasks;
+    private final Map<UUID, Task> tasks;
     private final BCryptPasswordEncoder  passwordEncoder =  new BCryptPasswordEncoder(10);
 
     public User(String name, char[] password) {
         this.name = name;
         this.hashedPassword = passwordEncoder.encode(new String(password));
         this.userId = UUID.randomUUID();
-        tasks = new ArrayList<>();
+        tasks = new ConcurrentHashMap<>();
         Arrays.fill(password, '0');
+    }
+
+    /**
+     * This constructor is for restoring users from data storage.
+     *
+     * @param userId
+     * @param name
+     * @param hashedPassword
+     * @param tasks
+     */
+    public User(UUID userId, String name, String hashedPassword, Map<UUID, Task> tasks) {
+        this.userId = userId;
+        this.name = name;
+        this.hashedPassword = hashedPassword;
+        this.tasks = tasks;
     }
 
 
@@ -26,8 +42,8 @@ public class User {
         return userId;
     }
 
-    public List<Task> getTasks() {
-        return Collections.unmodifiableList(tasks);
+    public Map<UUID, Task> getTasks() {
+        return Collections.unmodifiableMap(tasks);
     }
 
     public String getName() {
@@ -55,12 +71,23 @@ public class User {
     }
 
     /**
+     * this method is only meant for the storage.
+     *
+     * @return
+     */
+    public String getHashedPasswordForStorage() {
+        return hashedPassword;
+    }
+
+    /**
      * Method is only intended for TaskService. Potentially later in a repository layer.
      *
      * @param task The task to be added.
      */
-    public void addTaskInternal(Task task) {
-        tasks.add(task);
+    public void addTaskInternal(Task task) {tasks.put(task.getTaskId(), task);}
+
+    public boolean addTaskIfAbsent(Task task) {
+        return tasks.putIfAbsent(task.getTaskId(), task) == null;
     }
 
     /**
@@ -69,18 +96,14 @@ public class User {
      * @param task The task to be removed.
      */
     public void removeTaskInternal(Task task) {
-        tasks.remove(task);
+        tasks.remove(task.getTaskId());
     }
 
     public void updateTaskInternal(Task task) {
-        for (Task t : getTasks()) {
-            if (t.getTaskId().equals(task.getTaskId())) {
-                t.setTitle(task.getTitle());
-                t.setDescription(task.getDescription());
-                t.setStatus(task.getStatus());
-                break;
-            }
-        }
+        Task t = tasks.get(task.getTaskId());
+        t.setTitle(task.getTitle());
+        t.setDescription(task.getDescription());
+        t.setStatus(task.getStatus());
     }
 
     /**
@@ -93,8 +116,9 @@ public class User {
             sb.append("The user ").append(name).append(" has no tasks");
         } else {
             sb.append("The user ").append(name).append(" has the following tasks: \n");
-            for (Task task : tasks) {
-                sb.append(task.toString()).append("\n");
+
+            for (Map.Entry<UUID, Task> task : tasks.entrySet()) {
+                sb.append(task.getValue().toString()).append("\n");
             }
         }
         return sb.toString();

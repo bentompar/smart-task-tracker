@@ -15,7 +15,7 @@ public class Task {
 
     /**
      * Creates new task with given title and description.
-     * He status is PENDING by default.
+     * The status is PENDING by default.
      * @param title         The title of the task.
      * @param description   The description of the task.
      */
@@ -25,6 +25,22 @@ public class Task {
         this.description = description;
         this.title = title;
         this.status = Status.PENDING;
+    }
+
+
+    /**
+     * This constructor is for restoring tasks, not creating them.
+     *
+     * @param taskId
+     * @param title
+     * @param description
+     * @param status
+     */
+    public Task(UUID taskId, String title, String description, Status status) {
+        this.taskId = taskId;
+        this.title = title;
+        this.description = description;
+        this.status = status;
     }
 
     public UUID getTaskId() {
