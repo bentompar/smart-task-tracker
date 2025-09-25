@@ -1,22 +1,20 @@
 package com.BenjaminPark.dto;
 
 public class UserUpdateRequest {
-    String name;
-    char[] password;
+    private final String name;
+    private final char[] password;
+
+    public UserUpdateRequest(String name, char[] password) {
+        this.name = name;
+        this.password = password != null ? password.clone() : null;
+    }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public char[] getPassword() {
-        return password;
-    }
-
-    public void setPassword(char[] password) {
-        this.password = password;
+        return password != null ? password.clone() : null;
     }
 }
+

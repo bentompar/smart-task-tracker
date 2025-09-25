@@ -3,19 +3,26 @@ package com.BenjaminPark.dto;
 import com.BenjaminPark.model.Status;
 
 public class TaskUpdateRequest {
-    private String title;
-    private String description;
-    private Status status;
+    private final String title;
+    private final String description;
+    private final Status status;
 
-    public String getTitle() {return this.title;}
+    public TaskUpdateRequest(String title, String description, Status status) {
+        this.title = title;
+        this.description = description;
+        this.status = status;
+    }
 
-    public void setTitle(String title) {this.title = title;}
+    public String getTitle() {
+        return title;
+    }
 
-    public String getDescription() {return this.description;}
+    public String getDescription() {
+        return description;
+    }
 
-    public void setDescription(String description) {this.description = description;}
-
-    public Status getStatus() {return this.status;}
-
-    public void setStatus(Status status) {this.status = status;}
+    public Status getStatus() {
+        return status;
+    }
 }
+
